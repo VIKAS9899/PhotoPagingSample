@@ -9,7 +9,9 @@ open class BaseViewModel2<T>(application: Application) :AndroidViewModel(applica
 
     var isRequesting: Boolean = false
     var isLoadingMore: Boolean = false
+    var errorMessage: String? = null
     var pageNumber: Int = 1
+
     open var pageSize: Int = Constant.DefaultPageSize
 
 
