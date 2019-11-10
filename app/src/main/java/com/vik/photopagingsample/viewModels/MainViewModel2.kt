@@ -40,14 +40,18 @@ class MainViewModel2(application: Application):BaseViewModel2<MainNavigator>(app
                         incrementPage()
                         getNavigator()?.onSuccess(response.body())
                     } else {
-                        getNavigator()?.onFailed(response.errorBody()?.string(),null)
+                        errorMessage = response.errorBody()?.string()
+                        getNavigator()?.onFailed(errorMessage,null)
                     }
                     isRequesting=false
+                    isLoadingMore = false
                 }
 
                 override fun onFailure(call: Call<ArrayList<Photo>>, t: Throwable) {
+                    errorMessage=t.message
+                    getNavigator()?.onFailed(errorMessage,t)
                     isRequesting=false
-                    getNavigator()?.onFailed(t.message,t)
+                    isLoadingMore = false
                 }
             })
 
