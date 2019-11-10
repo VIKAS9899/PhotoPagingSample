@@ -22,8 +22,8 @@ import kotlinx.android.synthetic.main.layout_error.*
 class TabFragment :Fragment(), MainNavigator {
 
 
-    lateinit var mMainViewModel: MainViewModel2
-    lateinit var adapter: PhotoPagedListAdapter
+    private lateinit var mMainViewModel: MainViewModel2
+    private lateinit var adapter: PhotoPagedListAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -40,6 +40,11 @@ class TabFragment :Fragment(), MainNavigator {
         mMainViewModel.setNavigator(this)
 
         initViews()
+
+        if (userVisibleHint && !mMainViewModel.isRequesting) {
+            println("onViewCreated: $isVisible")
+            mMainViewModel.loadPhotos(RequestType.FRESH)
+        }
 
     }
 
@@ -128,5 +133,13 @@ class TabFragment :Fragment(), MainNavigator {
 
         adapter.removeFooter()
         progressBar?.visibility=View.GONE
+    }
+
+    override fun setUserVisibleHint(isVisibleToUser: Boolean) {
+        super.setUserVisibleHint(isVisibleToUser)
+        if (isVisibleToUser && view!=null && !mMainViewModel.isRequesting){
+            println("setUserVisibleHint: $isVisibleToUser")
+            mMainViewModel.loadPhotos(RequestType.FRESH)
+        }
     }
 }

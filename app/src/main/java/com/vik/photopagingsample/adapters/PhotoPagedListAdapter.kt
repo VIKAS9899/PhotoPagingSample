@@ -28,23 +28,24 @@ class PhotoPagedListAdapter(private val mViewModel:MainViewModel2)
         if (mViewModel.isLoadingMore && position==itemCount-1) 0 else 1
 
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        if (viewType==1){
-            val view = LayoutInflater.from(parent.context).inflate(R.layout.photo_item, parent, false)
-            return ItemViewHolder(view)
-        }else{
-            val view = LayoutInflater.from(parent.context).inflate(R.layout.bottom_loader, parent, false)
-            return LoaderViewHolder(view)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder =
+        if (viewType == 1) {
+            val view =
+                LayoutInflater.from(parent.context).inflate(R.layout.photo_item, parent, false)
+            ItemViewHolder(view)
+        } else {
+            val view =
+                LayoutInflater.from(parent.context).inflate(R.layout.bottom_loader, parent, false)
+            LoaderViewHolder(view)
         }
 
-    }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         if (holder is ItemViewHolder){
-            val item = photos?.get(position)
-            holder.description.setBackgroundColor(item?.color.toColor())
-            holder.description.text = item?.description ?: "-"
-            Picasso.get().load(item?.urls?.regular).into(holder.image)
+            val item = photos[position]
+            holder.description.setBackgroundColor(item.color.toColor())
+            holder.description.text = item.description ?: "-"
+            Picasso.get().load(item.urls?.regular).into(holder.image)
         }
     }
 
@@ -62,8 +63,8 @@ class PhotoPagedListAdapter(private val mViewModel:MainViewModel2)
     }
 
     class ItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val image = itemView.findViewById<ImageView>(R.id.image)
-        val description=itemView.findViewById<TextView>(R.id.description)
+        val image: ImageView = itemView.findViewById(R.id.image)
+        val description: TextView =itemView.findViewById(R.id.description)
     }
 
     class LoaderViewHolder(itemView:View):RecyclerView.ViewHolder(itemView)
