@@ -12,6 +12,9 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
         <activity android:name=".MainActivity">
+
+        </activity>
+        <activity android:name=".TabActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

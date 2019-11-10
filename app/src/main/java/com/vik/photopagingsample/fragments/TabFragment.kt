@@ -1,46 +1,51 @@
-package com.vik.photopagingsample
+package com.vik.photopagingsample.fragments
 
-import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Handler
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
-import androidx.lifecycle.Observer
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.DividerItemDecoration
+import com.vik.photopagingsample.R
 import com.vik.photopagingsample.adapters.PhotoPagedListAdapter
 import com.vik.photopagingsample.listener.RVOnScrollListener
 import com.vik.photopagingsample.models.Photo
 import com.vik.photopagingsample.navigator.MainNavigator
-import com.vik.photopagingsample.network.*
+import com.vik.photopagingsample.network.RequestType
 import com.vik.photopagingsample.viewModels.MainViewModel2
 import kotlinx.android.synthetic.main.activity_main.*
 
-class MainActivity : AppCompatActivity(),MainNavigator {
+class TabFragment :Fragment(), MainNavigator {
 
 
     lateinit var mMainViewModel: MainViewModel2
     lateinit var adapter: PhotoPagedListAdapter
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_tab,container,false)
+    }
 
-        mMainViewModel=ViewModelProviders.of(this).get(MainViewModel2::class.java)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val key = arguments?.getInt("pageNumber") ?: 0
+        mMainViewModel=ViewModelProviders.of(this).get(key.toString(), MainViewModel2::class.java)
         mMainViewModel.setNavigator(this)
         adapter=PhotoPagedListAdapter(mMainViewModel)
         list.adapter=adapter
         list.addOnScrollListener(listener)
-        list.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
+        list.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
 
         val isFreshRequest = mMainViewModel.isRequesting && !mMainViewModel.isLoadingMore
 
         progressBar.visibility=if (isFreshRequest) View.VISIBLE else View.GONE
-
-//        Handler().postDelayed({ startActivity(Intent(this,TabActivity::class.java)) },2000)
-
     }
+
 
     private val listener= object : RVOnScrollListener() {
 
@@ -58,7 +63,7 @@ class MainActivity : AppCompatActivity(),MainNavigator {
         if (requestType==RequestType.LOAD_MORE){
             adapter.addFooter()
         }else{
-            progressBar.visibility=View.VISIBLE
+            progressBar?.visibility=View.VISIBLE
         }
     }
 
@@ -69,7 +74,7 @@ class MainActivity : AppCompatActivity(),MainNavigator {
             mMainViewModel.photos.addAll(data?: emptyList())
             adapter.notifyItemRangeInserted(oldListSize,data?.size?:0)
         }else{
-            progressBar.visibility=View.GONE
+            progressBar?.visibility=View.GONE
             mMainViewModel.photos.clear()
             mMainViewModel.photos.addAll(data?: emptyList())
             adapter.notifyDataSetChanged()
@@ -79,7 +84,7 @@ class MainActivity : AppCompatActivity(),MainNavigator {
     override fun onFailed(message: String?, throwable: Throwable?) {
         adapter.removeFooter()
         progressBar.visibility=View.GONE
-        Toast.makeText(this,
+        Toast.makeText(context,
             message?:throwable?.message?: "Error message!",
             Toast.LENGTH_SHORT).show()
     }

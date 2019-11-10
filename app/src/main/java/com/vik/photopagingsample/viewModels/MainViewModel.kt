@@ -3,6 +3,7 @@ package com.vik.photopagingsample.viewModels
 import android.app.Application
 import androidx.arch.core.util.Function
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Transformations
 import androidx.paging.LivePagedListBuilder
@@ -10,6 +11,7 @@ import androidx.paging.PagedList
 import com.vik.photopagingsample.data.PhotoDataFactory
 import com.vik.photopagingsample.models.Photo
 import com.vik.photopagingsample.network.NetworkStatus
+import com.vik.photopagingsample.observer.SingleLiveData
 import java.util.concurrent.Executors
 
 class MainViewModel(application: Application) : AndroidViewModel(application){
@@ -35,6 +37,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application){
         photoLiveData = LivePagedListBuilder(dataFactory, pagedConfig)
             .setFetchExecutor(executor)
             .build()
+
 
     }
 }

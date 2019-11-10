@@ -5,25 +5,27 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.paging.PagedListAdapter
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.squareup.picasso.Picasso
 import com.vik.photopagingsample.R
 import com.vik.photopagingsample.models.Photo
-import com.vik.photopagingsample.network.Loaded
-import com.vik.photopagingsample.network.NetworkStatus
 import com.vik.photopagingsample.toColor
+import com.vik.photopagingsample.viewModels.MainViewModel2
 
 
+class PhotoPagedListAdapter(private val mViewModel:MainViewModel2)
+    :RecyclerView.Adapter<RecyclerView.ViewHolder>(){
 
-class PhotoPagedListAdapter :PagedListAdapter<Photo,RecyclerView.ViewHolder>(DIFF_CALLBACK){
+    private val photos: ArrayList<Photo> = mViewModel.photos
 
-    private var networkStatus: NetworkStatus? = null
+
+    override fun getItemCount(): Int=photos.size+if (mViewModel.isLoadingMore) 1 else 0
+
+
 
 
     override fun getItemViewType(position: Int): Int =
-        if (hasExtraRow() && position == itemCount - 1) 0 else 1
+        if (mViewModel.isLoadingMore && position==itemCount-1) 0 else 1
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -39,19 +41,23 @@ class PhotoPagedListAdapter :PagedListAdapter<Photo,RecyclerView.ViewHolder>(DIF
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         if (holder is ItemViewHolder){
-            val item = getItem(position)
+            val item = photos?.get(position)
             holder.description.setBackgroundColor(item?.color.toColor())
             holder.description.text = item?.description ?: "-"
             Picasso.get().load(item?.urls?.regular).into(holder.image)
         }
     }
 
-    companion object{
-        val DIFF_CALLBACK=object :DiffUtil.ItemCallback<Photo>(){
-            override fun areItemsTheSame(oldItem: Photo, newItem: Photo): Boolean =oldItem.id==newItem.id
-
-            override fun areContentsTheSame(oldItem: Photo, newItem: Photo): Boolean = oldItem == newItem
-
+    fun addFooter(){
+        if (!mViewModel.isLoadingMore) {
+            mViewModel.isLoadingMore=true
+            notifyItemInserted(itemCount-1)
+        }
+    }
+    fun removeFooter(){
+        if (mViewModel.isLoadingMore) {
+            mViewModel.isLoadingMore=false
+            notifyItemRemoved(itemCount)
         }
     }
 
@@ -61,23 +67,5 @@ class PhotoPagedListAdapter :PagedListAdapter<Photo,RecyclerView.ViewHolder>(DIF
     }
 
     class LoaderViewHolder(itemView:View):RecyclerView.ViewHolder(itemView)
-
-    private fun hasExtraRow() = networkStatus!=null && networkStatus != Loaded
-
-    fun setNetworkStatus(newNetworkStatus:NetworkStatus){
-        val previousState = networkStatus
-        val previousExtraRow = hasExtraRow()
-        networkStatus = newNetworkStatus
-        val newExtraRow = hasExtraRow()
-        if (previousExtraRow != newExtraRow) {
-            if (previousExtraRow) {
-                notifyItemRemoved(itemCount)
-            } else {
-                notifyItemInserted(itemCount)
-            }
-        } else if (newExtraRow && previousState !== newNetworkStatus) {
-            notifyItemChanged(itemCount - 1)
-        }
-    }
 
 }
